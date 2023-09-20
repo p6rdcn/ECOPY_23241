@@ -140,7 +140,6 @@ def sort_by_key(input_dict):
     new_dict = {}
     counter = 0
     for i in keys:
-        print("counter: " + str(counter))
         new_dict[i] = input_dict[i]
     return new_dict
 
