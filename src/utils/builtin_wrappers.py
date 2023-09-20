@@ -54,7 +54,11 @@ def cumsum_list(input_list):
 
 def element_wise_sum(input_list1, input_list2):
     new_list = []
-    for i in range(len(input_list1)):
+    if len(input_list1) < len(input_list2):
+        shorter_list = input_list1
+    else:
+        shorter_list = input_list2
+    for i in range(len(shorter_list)):
         new_list.append(input_list1[i] + input_list2[i])
     return new_list
 
