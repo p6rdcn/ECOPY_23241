@@ -6,7 +6,6 @@ def number_of_elements_in_list(input_list):
 
 def remove_every_element_from_list(input_list):
     input_list.clear()
-    return None
 
 
 
