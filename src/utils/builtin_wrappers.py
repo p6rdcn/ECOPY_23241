@@ -1,4 +1,4 @@
-def contains_values(input_list, element):
+def contains_value(input_list, element):
     return(element in input_list)
 
 def number_of_elements_in_list(input_list):
