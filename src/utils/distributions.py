@@ -1,6 +1,7 @@
 import random
 import math
 import pyerf
+import scipy
 random.seed(42)
 
 
@@ -131,6 +132,87 @@ class CauchyDistribution:
 
     def ex_kurtosis(self):
         raise Exception("Moments undefined")
+
+    def mvsk(self):
+        return [self.mean(), self.variance(), self.skewness(), self.ex_kurtosis()]
+
+
+class LogisticDistribution:
+
+    def __init__(self, rand, location, scale):
+        self.rand = rand
+        self.location = location
+        self.scale = scale
+
+    def pdf(self, x):
+        return (math.e ** (-(x - self.location) / self.scale)) / (self.scale * (1 + math.e ** (-(x - self.location) / self.scale)) ** 2)
+
+    def cdf(self, x):
+        return 1 / (1 + math.e ** (-(x - self.location) / self.scale))
+
+    def ppf(self, p):
+        if p < 0 or p > 1:
+            raise Exception("Invalid probability")
+        else:
+            return self.location + self.scale * math.log(p / (1 - p), math.e)
+
+    def gen_rand(self):
+        return self.ppf(self.rand.random())
+
+    def mean(self):
+        return self.location
+
+    def variance(self):
+        return self.scale ** 2 * math.pi ** 2 / 3
+
+    def skewness(self):
+        return 0
+
+    def ex_kurtosis(self):
+        return 6/5
+
+    def mvsk(self):
+        return [self.mean(), self.variance(), self.skewness(), self.ex_kurtosis()]
+
+
+class ChiSquaredDistribution:
+
+    def __init__(self, rand, dof):
+        self.rand = rand
+        self.dof = dof
+
+    def pdf(self, x):
+        if x < 0:
+            return 0
+        else:
+            return (x ** (self.dof / 2 - 1) * math.e ** (-x / 2)) / (2 ** (self.dof / 2) * scipy.special.gamma(self.dof / 2))
+
+    def cdf(self, x):
+        if x < 0:
+            return 0
+        else:
+            return scipy.special.gammainc(self.dof / 2, x / 2)
+
+    def ppf(self, p):
+        if p < 0 or p > 1:
+            raise Exception("Invalid probability")
+        else:
+            return scipy.special.gammaincinv(self.dof / 2, p) * 2
+
+    def gen_rand(self):
+        return self.ppf(self.rand.random())
+
+    def mean(self):
+        return self.dof
+
+    def variance(self):
+        return self.dof * 2
+
+    def skewness(self):
+        return (8 / self.dof) ** 0.5
+
+    def ex_kurtosis(self):
+        return 12 / self.dof
 
     def mvsk(self):
         return [self.mean(), self.variance(), self.skewness(), self.ex_kurtosis()]
