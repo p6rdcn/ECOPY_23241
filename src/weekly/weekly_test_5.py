@@ -8,12 +8,6 @@ import pandas as pd
 import src.utils.distributions as distributions
 import src.weekly.weekly_test_2 as weekly
 
-file_to_load = Path.cwd().parent.joinpath('data').joinpath('chipotle.tsv')
-
-
-# 1. Task
-food = pd.read_csv(file_to_load, sep='\t')
-
 
 # 2. Task
 def change_price_to_float(input_df):
