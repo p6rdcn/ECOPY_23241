@@ -8,7 +8,7 @@ import random
 
 
 # 1. task
-euro12 = pd.read_csv("..\\data\\Euro_2012_stats_TEAM.csv")
+euro12 = pd.read_csv('../../data/Euro_2012_stats_TEAM.csv')
 
 
 # 2. task
@@ -38,7 +38,7 @@ def avg_goal(input_df):
 # 6. task
 def countries_over_five(input_df):
     new_df = input_df.copy()
-    return new_df[new_df["Goals"] >= 6]["Team"]
+    return pd.DataFrame(new_df[new_df["Goals"] >= 6]["Team"])
 
 
 # 7. task
@@ -56,7 +56,7 @@ def first_seven_columns(input_df):
 # 9. task
 def every_column_except_last_three(input_df):
     new_df = input_df.copy()
-    return new_df.iloc[:, 0:len(new_df.columns) - 3]
+    return new_df.iloc[:, 0:len(new_df.columns)-3]
 
 
 # 10. task
@@ -67,8 +67,6 @@ def sliced_view(input_df, columns_to_keep, column_to_filter, rows_to_keep):
 
 # 11. task
 def generate_quartile(input_df):
-    new_df = input_df.copy()
-
     def quartile(i):
         if i >= 6:
             return 1
@@ -79,50 +77,20 @@ def generate_quartile(input_df):
         else:
             return 4
 
-    new_df["Quartile"] = new_df["Goals"].apply(quartile)
-    return new_df
+    input_df["Quartile"] = input_df["Goals"].apply(quartile)
+    return input_df
 
 
 # 12. task
 def average_yellow_in_quartiles(input_df):
     new_df = input_df.copy()
-    q1 = new_df["Passes"].quantile(0.25)
-    q2 = new_df["Passes"].quantile(0.5)
-    q3 = new_df["Passes"].quantile(0.75)
-
-    def quartile(i):
-        if i >= q3:
-            return 1
-        elif i >= q2:
-            return 2
-        elif i >= q1:
-            return 3
-        else:
-            return 4
-
-    new_df["Passes_quart"] = new_df["Passes"].apply(quartile)
-    return new_df.groupby("Passes_quart")["Passes"].mean().reset_index()
+    return new_df.groupby("Quartile")["Passes"].mean()
 
 
 # 13. task
 def minmax_block_in_quartile(input_df):
     new_df = input_df.copy()
-    q1 = new_df["Blocks"].quantile(0.25)
-    q2 = new_df["Blocks"].quantile(0.5)
-    q3 = new_df["Blocks"].quantile(0.75)
-
-    def quartile(i):
-        if i >= q3:
-            return 1
-        elif i >= q2:
-            return 2
-        elif i >= q1:
-            return 3
-        else:
-            return 4
-
-    new_df["Blocks_quart"] = new_df["Blocks"].apply(quartile)
-    return new_df.groupby("Blocks_quart")["Blocks"].agg(['min', 'max']).reset_index()
+    return new_df.groupby("Quartile")["Blocks"].agg(['min', 'max'])
 
 
 # 14. task
@@ -137,9 +105,8 @@ def scatter_goals_shots(input_df):
 
 # 15. task
 def scatter_goals_shots_by_quartile(input_df):
-    new_df = generate_quartile(input_df)
     fig, ax = plt.subplots()
-    scatter = ax.scatter(new_df["Goals"], new_df["Shots on target"], c = new_df["Quartile"], label = new_df["Quartile"])
+    scatter = ax.scatter(input_df["Goals"], input_df["Shots on target"], c = input_df["Quartile"], label = input_df["Quartile"])
     ax.set_xlabel("Goals")
     ax.set_ylabel("Shots on target")
     ax.set_title("Goals and Shot on target")
