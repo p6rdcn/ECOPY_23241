@@ -11,8 +11,9 @@ import src.weekly.weekly_test_2 as weekly
 
 # 2. Task
 def change_price_to_float(input_df):
-    input_df["item_price"] = pd.to_numeric(input_df["item_price"].str.replace("$", ""), errors = "coerce")
-    return input_df
+    new_df = input_df.copy()
+    new_df["item_price"] = pd.to_numeric(new_df["item_price"].str.replace("$", ""), errors = "coerce")
+    return new_df
 
 
 # 3. Task
@@ -42,7 +43,8 @@ def avg_price(input_df):
 # 7. Task
 def unique_items_over_ten_dollars(input_df):
     new_df = input_df.copy()
-    return pd.DataFrame(new_df[new_df["item_price"] > 10])
+    new_df = new_df[new_df["item_price"] > 10][["item_name", "choice_description", "item_price"]]
+    return new_df.drop_duplicates(subset = ["item_name", "choice_description", "item_price"])
 
 
 # 8. Task
@@ -71,6 +73,8 @@ def sliced_view(input_df, columns_to_keep, column_to_filter, rows_to_keep):
 
 # 12. Task
 def generate_quartile(input_df):
+    new_df = input_df.copy()
+
     def quartile(i):
         if i >= 30:
             return 'premium'
@@ -81,8 +85,8 @@ def generate_quartile(input_df):
         else:
             return 'low-cost'
 
-    input_df["Quartile"] = input_df["item_price"].apply(quartile)
-    return input_df
+    new_df["Quartile"] = new_df["item_price"].apply(quartile)
+    return new_df
 
 
 # 13. Task
