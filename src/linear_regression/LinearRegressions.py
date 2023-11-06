@@ -19,19 +19,17 @@ class LinearRegressionSM:
 
     def get_params(self):
         coefficients = self.model.params
-        coefficients_df = pd.DataFrame({"Beta coefficients": coefficients})
-        return coefficients_df.squeeze()
+        return pd.Series(coefficients, name = "Beta coefficients")
 
     def get_pvalues(self):
         p_vals = self.model.pvalues
-        p_vals_df = pd.DataFrame({"P-values for the corresponding coefficients": p_vals})
-        return p_vals_df.squeeze()
+        return pd.Series(p_vals, name = "P-values for the corresponding coefficients")
 
-    def get_wald_test_result(self, restriction_matrix):
-        test = self.model.wald_test(restriction_matrix)
-        fvalue = self.model.fvalue
-        pvalue = self.model.f_pvalue
-        return f"F-value: {fvalue:.2f}, p-value: {pvalue:.3f}"
+    def get_wald_test_result(self, constraints):
+        wald_test = self.model.wald_test(constraints, scalar = True)
+        f_value = wald_test.statistic
+        p_value = wald_test.pvalue
+        return f"F-value: {f_value:.3}, p-value: {p_value:.3}"
 
     def get_model_goodness_values(self):
         ars = self.model.rsquared_adj
