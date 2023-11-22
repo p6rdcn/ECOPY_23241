@@ -6,6 +6,7 @@ import pandas as pd
 import statsmodels.api as sm
 import numpy as np
 import scipy.stats as stats
+from scipy.optimize import minimize
 
 
 class LinearRegressionSM:
@@ -141,5 +142,52 @@ class LinearRegressionGLS:
         SSR = self.left_hand_side.T @ self.v_inv @ self.X @ np.linalg.inv(
             self.X.T @ self.v_inv @ self.X) @ self.X.T @ self.v_inv @ self.left_hand_side
         crs = 1 - SSR / SST
+        ars = 1 - (1 - crs) * (self.n - 1) / self.dof
+        return f"Centered R-squared: {crs:.3f}, Adjusted R-squared: {ars:.3f}"
+
+
+class LinearRegressionML:
+    def __init__(self, left_hand_side, right_hand_side):
+        self.left_hand_side = left_hand_side
+        self.right_hand_side = right_hand_side
+
+        self.n = self.right_hand_side.shape[0]
+        self.X = np.concatenate((np.ones((self.n, 1)), self.right_hand_side), axis=1)
+        self.k = self.X.shape[1]
+        self.dof = self.n - self.k
+
+        self.betas = None
+        self.residuals = None
+        self.variance = None
+        self.SE = None
+
+    def fit(self):
+        def negative_log_likelihood(params, X, y):
+            initial_intercept, initial_slope1, initial_slope2, initial_slope3, initial_sigma = params
+            betas = [initial_intercept, initial_slope1, initial_slope2, initial_slope3]
+            y_pred = X @ betas
+            return -1 * np.sum(stats.norm.logpdf(y, y_pred, initial_sigma))
+
+        initial_params = [0.1, 0.1, 0.1, 0.1, 0.1]
+        result = minimize(fun=negative_log_likelihood, x0=initial_params, args=(self.X, self.left_hand_side),
+                          method="L-BFGS-B")
+        self.betas = result.x[:4]
+        self.variance = result.x[-1] * self.n / (self.dof)
+
+    def get_params(self):
+        return pd.Series(self.betas, name="Beta coefficients")
+
+    def get_pvalues(self):
+        self.residuals = self.left_hand_side - self.X @ self.betas
+        #self.variance = self.residuals.T @ self.residuals / self.dof
+        self.SE = np.sqrt(np.diag(self.variance * np.linalg.inv(self.X.T @ self.X)))
+        t_values = self.betas / self.SE
+        p_values = 2 * (1 - stats.t.cdf(abs(t_values), self.dof))
+        return pd.Series(p_values, name="P-values for the corresponding coefficients")
+
+    def get_model_goodness_values(self):
+        y_mean = self.left_hand_side.mean()
+        y_centered = self.left_hand_side - y_mean
+        crs = 1 - self.residuals.T @ self.residuals / (y_centered.T @ y_centered)
         ars = 1 - (1 - crs) * (self.n - 1) / self.dof
         return f"Centered R-squared: {crs:.3f}, Adjusted R-squared: {ars:.3f}"
