@@ -172,7 +172,7 @@ class LinearRegressionML:
         result = minimize(fun=negative_log_likelihood, x0=initial_params, args=(self.X, self.left_hand_side),
                           method="L-BFGS-B")
         self.betas = result.x[:4]
-        self.variance = result.x[-1] * self.n / (self.dof)
+        self.variance = result.x[-1] ** 2 * self.n / self.dof
 
     def get_params(self):
         return pd.Series(self.betas, name="Beta coefficients")
